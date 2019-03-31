@@ -1,0 +1,9 @@
+.idea/**
+*.iml
+**/.idea/**
+**/*.iml
+cmake-build-debug/**
+**/logs/*.txt
+**/logs/*.log
+
+webserver/config/config-local.php
