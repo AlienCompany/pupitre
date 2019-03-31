@@ -2,11 +2,10 @@ set(INC_PATH     "./include")
 set(LIB_DIR_PATH "./lib")
 # Lib include
 set(LIB_SRC_FILES)
-set(LIB_INC_PATH)
+set(LIB_INC_PATH "C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino")
 
-set(LIBRARIES ${CMAKE_SOURCE_DIR}/lib/${LOCAL_LIB})
-foreach(libdir ${LIBRARIES})
-    set(subdir ${libdir}/src)
+foreach(libdir ${LOCAL_LIB})
+    set(subdir ${CMAKE_SOURCE_DIR}/lib/${libdir}/src)
     file(GLOB_RECURSE lib_files "${subdir}/*.cpp"
             "${subdir}/*.cc"
             "${subdir}/*.c"
@@ -20,5 +19,7 @@ foreach(libdir ${LIBRARIES})
     endif()
     list(APPEND LIB_SRC_FILES "${lib_files}")
 endforeach()
+
+message(LIB_SRC_FILES: ${LIB_SRC_FILES})
 
 include_directories(${INC_PATH} ${LIB_INC_PATH})

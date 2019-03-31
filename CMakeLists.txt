@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/ArduinoToolchain.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/CustomBoard.cmake)
 
-set(LOCAL_LIB arduino-lib-alien-co)
+set(LOCAL_LIB LiquidCrystal_I2C arduino-lib-alien-co)
 include(${CMAKE_SOURCE_DIR}/cmake/CustomLib.cmake)
 
 set(COMMON_CPPS
