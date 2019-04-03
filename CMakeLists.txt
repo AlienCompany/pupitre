@@ -11,8 +11,8 @@ set(COMMON_HS
         )
 set(COMMON_LIB
         )
-set(PROJECT_BOARD mega)
-set(PORT COM8)
+set(PROJECT_BOARD nano)
+set(PORT COM7)
 
 message(LIB_SRC_FILES ${LIB_SRC_FILES})
 message(LIB_INC_PATH ${LIB_INC_PATH})
