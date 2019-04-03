@@ -37,28 +37,48 @@ void loop() {
 
     MultiSensorEventCode<4> multiSensorRes;
 
+    if(Serial.available()){
+        delay(10);
+        uint8_t l = Serial.readStringUntil(',').toInt();
+        uint8_t r = Serial.readStringUntil(',').toInt();
+        uint8_t g = Serial.readStringUntil(',').toInt();
+        uint8_t b = Serial.readStringUntil(',').toInt();
+        Color c = Color(r,g,b);
+        leds.setColor(l,c);
+    }
+
     if ((multiSensorRes = multiSensor.checkChange()).change) {
+        Serial.print(multiSensor.getState().sensor[0]);
+        Serial.print(multiSensor.getState().sensor[1]);
+        Serial.print(multiSensor.getState().sensor[2]);
+        Serial.println(multiSensor.getState().sensor[3]);
         if (multiSensorRes.sensor[0] != NONE) {
-            leds.setColor(0, multiSensorRes.sensor[0] == CLOSE ? 0x00FF00 : 0xFF0000);
+            Serial.print("set color of led 0 : ");
+            Serial.println(multiSensorRes.sensor[0]);
+            leds.setColor(0, multiSensorRes.sensor[0] == CLOSE ? GREEN : RED);
         }
         if (multiSensorRes.sensor[1] != NONE) {
-            leds.setColor(1, multiSensorRes.sensor[1] == CLOSE ? 0x00FF00 : 0xFF0000);
+            Serial.print("set color of led 1 : ");
+            Serial.println(multiSensorRes.sensor[1] == CLOSE);
+            leds.setColor(1, multiSensorRes.sensor[1] == CLOSE ? GREEN : RED);
         }
         if (multiSensorRes.sensor[2] != NONE) {
-            leds.setColor(2, multiSensorRes.sensor[2] == CLOSE ? 0x00FF00 : 0xFF0000);
-        }
-        if (multiSensorRes.sensor[3] == CLOSE) {
+            Serial.print("set color of led 2 : ");
+            Serial.println(multiSensorRes.sensor[2] == CLOSE);
+            leds.setColor(2, multiSensorRes.sensor[2] == CLOSE ? GREEN : RED);
+        } else if (multiSensorRes.sensor[3] == CLOSE) {
+            Serial.println("BTN 1 CLOSE");
             for(uint8_t i = 0 ; i < 3 ;i++){
-                leds.setColor(i, leds.getColor(i).value() >> 2);
+                leds.setColor(i, leds.getColor(i).value() >> 8);
             }
-        }
-
-        if (multiSensorRes.sensor[3] == OPEN) {
+        } else if (multiSensorRes.sensor[3] == OPEN) {
+            Serial.println("BTN 1 OPEN");
             for(uint8_t i = 0 ; i < 3 ;i++){
-                leds.setColor(i, leds.getColor(i).value() << 2);
+                leds.setColor(i, leds.getColor(i).value() << 8);
             }
         }
     }
+
 
     leds.update();
 }
