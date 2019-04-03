@@ -19,10 +19,18 @@ const MultiSensorBinaryValues<4> initDigitalSensorValues = {1023, 184, 326, 132,
 
 MultiDigitalSensorInAnalog<4> multiSensor = MultiDigitalSensorInAnalog<4>(A0, initDigitalSensorValues);
 
+const Color ORANGE = Color(0xFFFFFF);
+const Color WHITE = Color(85,187,255);
+const Color RED = Color(0xFF0000);
+const Color GREEN = Color(0x00FF00);
+const Color BLUE = Color(0x0000FF);
+const Color BLACK = Color(0);
+
 
 void setup() {
     Serial.begin(9600);
     leds.init();
+    multiSensor.init();
 }
 
 void loop() {
