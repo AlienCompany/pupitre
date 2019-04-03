@@ -30,6 +30,25 @@ void loop() {
     MultiSensorEventCode<4> multiSensorRes;
 
     if ((multiSensorRes = multiSensor.checkChange()).change) {
+        if (multiSensorRes.sensor[0] != NONE) {
+            leds.setColor(0, multiSensorRes.sensor[0] == CLOSE ? 0x00FF00 : 0xFF0000);
+        }
+        if (multiSensorRes.sensor[1] != NONE) {
+            leds.setColor(1, multiSensorRes.sensor[1] == CLOSE ? 0x00FF00 : 0xFF0000);
+        }
+        if (multiSensorRes.sensor[2] != NONE) {
+            leds.setColor(2, multiSensorRes.sensor[2] == CLOSE ? 0x00FF00 : 0xFF0000);
+        }
+        if (multiSensorRes.sensor[3] == CLOSE) {
+            for(uint8_t i = 0 ; i < 3 ;i++){
+                leds.setColor(i, leds.getColor(i).value() >> 2);
+            }
+        }
+
+        if (multiSensorRes.sensor[3] == OPEN) {
+            for(uint8_t i = 0 ; i < 3 ;i++){
+                leds.setColor(i, leds.getColor(i).value() << 2);
+            }
         }
     }
 
