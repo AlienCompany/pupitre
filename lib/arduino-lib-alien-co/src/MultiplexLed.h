@@ -20,12 +20,12 @@ struct Color {
     uint8_t g;
     uint8_t b;
 
-    explicit Color(uint8_t r, uint8_t g, uint8_t b): r(r),g(g),b(b) {}
+    explicit Color(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {}
 
-    explicit Color(uint32_t value = 0): r(value>>16), g(value>>8), b(value>>16) {}
+    explicit Color(uint32_t value = 0) : r(value >> 16), g(value >> 8), b(value) {}
 
     uint32_t value() {
-        return (r << 16) + (g << 8) + b;
+        return ((((uint32_t) r) << (uint32_t) 16) & 0xFF0000) + ((g << 8) & 0x00FF00) + (b & 0x0000FF);
     }
 };
 
@@ -36,7 +36,7 @@ private:
     const ArrayFix<const byte> PINS_COLORS;
     MultiplexMode multiplexMode;
     uint32_t nextUpadate = 0;
-    uint32_t periode = 30;
+    uint32_t periode = 3;
     uint8_t currentLedIndex = 0;
 
 public:
