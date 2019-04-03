@@ -31,7 +31,7 @@ class MultiDigitalSensorInAnalog {
 private:
     const byte ANNALOG_PIN;
     MultiSensorBinaryValues<NB_SENSOR> binaryValues;
-    const uint8_t lastval = 0;
+    uint8_t lastval = 0;
     uint32_t nextCheck = 0;
     uint32_t sensibility = 100;
 
@@ -59,16 +59,17 @@ public:
 
 
     MultiSensorEventCode<NB_SENSOR> checkChange(){
-        if(nextCheck > millis()) return MultiSensorEventCode<NB_SENSOR>()
+        if(nextCheck > millis()) return MultiSensorEventCode<NB_SENSOR>();
         uint8_t newVal = convertAnnalogToBinarys(analogRead(ANNALOG_PIN));
         if(newVal == lastval) return MultiSensorEventCode<NB_SENSOR>();
 
         MultiSensorEventCode<NB_SENSOR>res;
         res.change = true;
         for(uint8_t i =0; i <NB_SENSOR; i++){
-            res.sensor[i] = newVal - lastval;
+            res.sensor[i] = (SensorEventCode)(((newVal >> i) & 1 ) - ((lastval >> i) & 1 ));
         }
 
+        lastval = newVal;
         nextCheck += sensibility;
 
         return res;
@@ -76,9 +77,9 @@ public:
     }
 
     MultiSensorState<NB_SENSOR> getState(){
-        MultiSensorState<NB_SENSOR> res();
+        MultiSensorState<NB_SENSOR> res;
         for(uint8_t i =0; i <NB_SENSOR; i++){
-            res.sensor[i] = (lastval>>i)&1;
+            res.sensor[i] = (lastval>>i)&1 ? SS_CLOSED : SS_OPENED;
         }
         return res;
     }

@@ -59,7 +59,7 @@ void MultiplexLed::changeCurrentLed() {
     currentLedIndex++;
     if (currentLedIndex == PINS_LEDS.length) currentLedIndex = 0;
     for (uint8_t i = 0; i < PINS_COLORS.length; i++) {
-        uint8_t value = getBrightness(currentLedIndex, 0);
+        uint8_t value = getBrightness(currentLedIndex, i);
         if (multiplexMode == ANODE_GROUP) value ^= 255;
 
         if(value == 0){
@@ -70,12 +70,11 @@ void MultiplexLed::changeCurrentLed() {
             analogWrite(PINS_COLORS.array[i], value);
         }
     }
-
     digitalWrite(PINS_LEDS.array[currentLedIndex], ledEnableValue);
 }
 
 void MultiplexLed::update() {
-    if (nextUpadate > millis()) {
+    if (nextUpadate < millis()) {
         changeCurrentLed();
         nextUpadate = millis() + periode;
     }
@@ -89,7 +88,8 @@ void MultiplexLed::init() {
     }
 
     for(uint8_t i = 0 ; i < PINS_LEDS.length; i++){
-        pinMode(PINS_LEDS.array[i], ledDisableValue);
+        pinMode(PINS_LEDS.array[i], OUTPUT);
+        digitalWrite(PINS_LEDS.array[i], ledDisableValue);
     }
     for(uint8_t i = 0 ; i < PINS_COLORS.length; i++)
         pinMode(PINS_COLORS.array[i], OUTPUT);
