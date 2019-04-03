@@ -16,8 +16,8 @@ set(PORT COM8)
 
 message(LIB_SRC_FILES ${LIB_SRC_FILES})
 message(LIB_INC_PATH ${LIB_INC_PATH})
-# ==================== Reveil : BEGIN ====================
-set(PROJECT_NAME AlienProject)
+# ==================== Pupitre : BEGIN ====================
+set(PROJECT_NAME Pupitre)
 project(${PROJECT_NAME})
 
 #### Uncomment below additional settings as needed.
