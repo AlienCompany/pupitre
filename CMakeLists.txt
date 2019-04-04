@@ -6,8 +6,12 @@ set(LOCAL_LIB LiquidCrystal_I2C arduino-lib-alien-co)
 include(${CMAKE_SOURCE_DIR}/cmake/CustomLib.cmake)
 
 set(COMMON_CPPS
+        PupitreBase.cpp
+        PupitrePSTJ.cpp
         )
 set(COMMON_HS
+        PupitreBase.h
+        PupitrePSTJ.h
         )
 set(COMMON_LIB
         )
