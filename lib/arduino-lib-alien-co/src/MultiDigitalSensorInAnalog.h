@@ -54,7 +54,7 @@ private:
 
 
 public:
-    MultiDigitalSensorInAnalog(const byte annalogPin, const MultiSensorBinaryValues<NB_SENSOR> &binaryValues)
+    MultiDigitalSensorInAnalog(const byte annalogPin, const MultiSensorBinaryValues<NB_SENSOR> binaryValues)
             : ANNALOG_PIN(annalogPin), binaryValues(binaryValues) {}
 
 
@@ -79,9 +79,13 @@ public:
     MultiSensorState<NB_SENSOR> getState(){
         MultiSensorState<NB_SENSOR> res;
         for(uint8_t i =0; i <NB_SENSOR; i++){
-            res.sensor[i] = (lastval>>i)&1 ? SS_CLOSED : SS_OPENED;
+            res.sensor[i] = getState(i);
         }
         return res;
+    }
+
+    SensorState getState(uint8_t index){
+        return (lastval>>index)&1 ? SS_CLOSED : SS_OPENED;
     }
 
     uint32_t getSensibility() const {
