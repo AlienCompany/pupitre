@@ -66,7 +66,9 @@ public:
         MultiSensorEventCode<NB_SENSOR>res;
         res.change = true;
         for(uint8_t i =0; i <NB_SENSOR; i++){
-            res.sensor[i] = (SensorEventCode)(((newVal >> i) & 1 ) - ((lastval >> i) & 1 ));
+            const int lastE = ((lastval >> i) & 1);
+            const int newE = ((newVal >> i) & 1);
+            res.sensor[i] = lastE == newE ? NONE : newE ? CLOSE: OPEN;
         }
 
         lastval = newVal;

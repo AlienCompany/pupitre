@@ -22,8 +22,9 @@ enum PupitreMode{
 
 enum LineStat{
     UNKNOWN = 0,
-    DICONNECTED = 1,
-    CONNECTED = 2
+    DISCONNECTED = 1,
+    CONNECTED = 2,
+    READY = 3
 };
 
 class PupitreBase {
@@ -34,10 +35,10 @@ private:
     byte PIN_LED_COLOR1;
     byte PIN_LED_COLOR2;
     byte PIN_LED_COLOR3;
-    byte PIN_COM_1;
-    byte PIN_COM_2;
-    byte PIN_COM_3;
-    byte PIN_COM_GND;
+    byte PIN_LINE_1;
+    byte PIN_LINE_2;
+    byte PIN_LINE_3;
+    byte PIN_LINE_COM;
     byte PIN_FIRE;
     byte PIN_CLEF;
     byte PIN_BTNS;
@@ -57,8 +58,8 @@ private:
     boolean fireL3 = false;
 
 protected:
-    Sensor sensorClef = Sensor(PIN_CLEF);
-    Sensor sensorFire = Sensor(PIN_FIRE);
+    Sensor sensorClef = Sensor(PIN_CLEF, WITH_PULL_UP);
+    Sensor sensorFire = Sensor(PIN_FIRE, WITH_PULL_UP);
 
     MultiplexLed leds = MultiplexLed(
             ArrayFix<const byte>(3, new byte[3]{PIN_LED1, PIN_LED2, PIN_LED3}),
@@ -66,10 +67,12 @@ protected:
     );
 
 
-    MultiDigitalSensorInAnalog<4> multiSensor = MultiDigitalSensorInAnalog<4>(A0, initDigitalSensorValues);
+    MultiDigitalSensorInAnalog<4> multiSensor = MultiDigitalSensorInAnalog<4>(PIN_BTNS, initDigitalSensorValues);
 
     virtual void onLineConnected(uint8_t line) = 0;
     virtual void onLineDiconnected(uint8_t line) = 0;
+    virtual void onLineIsReady(uint8_t line) = 0;
+    virtual void onLineIsNotReady(uint8_t line) = 0;
 
     virtual void onKeyRemove() = 0;
     virtual void onKeyInsert() = 0;
@@ -114,8 +117,22 @@ public:
 
     bool keyIsPresent();
 
+    byte getLinePin(uint8_t line){
+        switch (line){
+            case 0:
+                return PIN_LINE_1;
+            case 1:
+                return PIN_LINE_2;
+            case 2:
+                return PIN_LINE_3;
+            default:
+                return 0;
+        }
+    }
+
     virtual void update();
 
+    void setLineStat(uint8_t line, LineStat stat);
 };
 
 

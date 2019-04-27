@@ -10,7 +10,7 @@
 
 class PupitrePSTJ : public PupitreBase {
 private:
-    uint32_t fireDuration = 0;
+    uint32_t fireDuration = 3000;
     uint32_t fireStartTime = 0;
     uint32_t fireEndTime = 0;
 
@@ -19,7 +19,7 @@ private:
 
 public:
     PupitrePSTJ(byte pinLed1, byte pinLed2, byte pinLed3, byte pinLedColor1, byte pinLedColor2, byte pinLedColor3,
-                byte pinCom1, byte pinCom2, byte pinCom3, byte pinComGnd, byte pinFire, byte pinClef, byte pinBtns,
+                byte pinLine1, byte pinLine2, byte pinLine3, byte pinLineCom, byte pinFire, byte pinClef, byte pinBtns,
                 byte pinEncoderA, byte pinEncoderB, byte pinLcdSda, byte pinLcdScl);
 
 protected:
@@ -42,6 +42,11 @@ protected:
     void onLineConnected(uint8_t line) override;
 
     void onLineDiconnected(uint8_t line) override;
+
+    virtual void onLineIsReady(uint8_t line);
+
+    virtual void onLineIsNotReady(uint8_t line);
+
 
 public:
     virtual void update();

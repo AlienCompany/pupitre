@@ -19,7 +19,7 @@ PupitreBase::PupitreBase(
         byte pinLcdSda, byte pinLcdScl
         ) : PIN_LED1(pinLed1), PIN_LED2(pinLed2), PIN_LED3(pinLed3),
           PIN_LED_COLOR1(pinLedColor1), PIN_LED_COLOR2(pinLedColor2), PIN_LED_COLOR3(pinLedColor3),
-          PIN_COM_1(pinCom1),PIN_COM_2(pinCom2), PIN_COM_3(pinCom3), PIN_COM_GND(pinComGnd),
+          PIN_LINE_1(pinCom1),PIN_LINE_2(pinCom2), PIN_LINE_3(pinCom3), PIN_LINE_COM(pinComGnd),
           PIN_FIRE(pinFire),
           PIN_CLEF(pinClef),
           PIN_BTNS(pinBtns),
@@ -29,59 +29,93 @@ PupitreBase::PupitreBase(
 }
 
 void PupitreBase::checkLineStat() {
-    if(mode == MODE_SCANING){
-        LineStat stat = digitalRead(PIN_COM_1) == LOW ? CONNECTED : DICONNECTED;
-        if(stat != statL1){
-            statL1 = stat;
-            if(stat == CONNECTED){
-                onLineConnected(0);
-            } else {
-                onLineDiconnected(0);
-            }
-        }
-        stat = digitalRead(PIN_COM_2) == LOW ? CONNECTED : DICONNECTED;
-        if(stat != statL2){
-            statL2 = stat;
-            if(stat == CONNECTED){
-                onLineConnected(1);
-            } else {
-                onLineDiconnected(1);
-            }
-        }
 
-        stat = digitalRead(PIN_COM_3) == LOW ? CONNECTED : DICONNECTED;
-        if(stat != statL3){
-            statL3 = stat;
-            if(stat == CONNECTED){
-                onLineConnected(2);
+    if(mode == MODE_SCANING){
+
+        static uint32_t nextStep = 0;
+        if(nextStep > millis()) return;
+        nextStep = millis() + 5;
+
+        static uint8_t currentStep = 0;
+        static uint8_t currentLine = 0;
+        static bool currentLineIsConnected = false;
+
+        if(currentStep == 0){
+            byte pin = getLinePin(currentLine);
+            pinMode(pin, INPUT_PULLUP);
+            currentStep = 1;
+        } else if(currentStep == 1){
+            byte pin = getLinePin(currentLine);
+            currentLineIsConnected = digitalRead(pin) == LOW;
+            if(currentLineIsConnected){
+                digitalWrite(PIN_LINE_COM, HIGH);
+                pinMode(pin, INPUT);
+                currentStep = 2;
             } else {
-                onLineDiconnected(2);
+                LineStat oldStat = getLineStat(currentLine);
+                if(oldStat != DISCONNECTED){
+                    setLineStat(currentLine, DISCONNECTED);
+                    if(oldStat == READY){
+                        onLineIsNotReady(currentLine);
+                    }
+                    onLineDiconnected(currentLine);
+                }
+                currentStep = 3;
             }
+        } else if(currentStep == 2){
+
+            bool isReady = digitalRead(getLinePin(currentLine)) == HIGH;
+            LineStat oldStat = getLineStat(currentLine);
+            setLineStat(currentLine, isReady ? READY: CONNECTED);
+            if(oldStat == DISCONNECTED){
+                onLineConnected(currentLine);
+            }
+            if(isReady && oldStat == CONNECTED){
+                onLineIsReady(currentLine);
+            }
+            if(!isReady && oldStat == READY){
+                onLineIsNotReady(currentLine);
+            }
+            currentStep = 3;
+
+        } else if(currentStep == 3){
+
+            pinMode(getLinePin(currentLine), INPUT);
+            pinMode(PIN_LINE_COM, OUTPUT);
+            digitalWrite(PIN_LINE_COM, LOW);
+            currentLine++;
+            if(currentLine == 3)currentLine = 0;
+            currentStep = 0;
+
         }
     }
 }
 
 void PupitreBase::setMode(PupitreMode mode) {
+    Serial.print("set mode to: ");
     if(mode == MODE_FIRE){
-        pinMode(PIN_COM_1, OUTPUT);
-        digitalWrite(PIN_COM_1, LOW);
-        pinMode(PIN_COM_2, OUTPUT);
-        digitalWrite(PIN_COM_2, LOW);
-        pinMode(PIN_COM_3, OUTPUT);
-        digitalWrite(PIN_COM_3, LOW);
-        pinMode(PIN_COM_GND, OUTPUT);
-        digitalWrite(PIN_COM_GND, LOW);
+        Serial.println("FIRE");
+        pinMode(PIN_LINE_1, OUTPUT);
+        digitalWrite(PIN_LINE_1, LOW);
+        pinMode(PIN_LINE_2, OUTPUT);
+        digitalWrite(PIN_LINE_2, LOW);
+        pinMode(PIN_LINE_3, OUTPUT);
+        digitalWrite(PIN_LINE_3, LOW);
+        pinMode(PIN_LINE_COM, OUTPUT);
+        digitalWrite(PIN_LINE_COM, LOW);
     } else if (mode == MODE_SCANING){
-        pinMode(PIN_COM_1, INPUT_PULLUP);
-        pinMode(PIN_COM_2, INPUT_PULLUP);
-        pinMode(PIN_COM_3, INPUT_PULLUP);
-        pinMode(PIN_COM_GND, OUTPUT);
-        digitalWrite(PIN_COM_GND, LOW);
+        Serial.println("SCANING");
+        pinMode(PIN_LINE_1, INPUT);
+        pinMode(PIN_LINE_2, INPUT);
+        pinMode(PIN_LINE_3, INPUT);
+        pinMode(PIN_LINE_COM, OUTPUT);
+        digitalWrite(PIN_LINE_COM, LOW);
     } else if (mode == MODE_WATING){
-        pinMode(PIN_COM_1, INPUT);
-        pinMode(PIN_COM_2, INPUT);
-        pinMode(PIN_COM_3, INPUT);
-        pinMode(PIN_COM_GND, INPUT);
+        Serial.println("WATING");
+        pinMode(PIN_LINE_1, INPUT);
+        pinMode(PIN_LINE_2, INPUT);
+        pinMode(PIN_LINE_3, INPUT);
+        pinMode(PIN_LINE_COM, INPUT);
 
     }
     fireL1 = fireL2 = fireL3 = false;
@@ -91,30 +125,47 @@ void PupitreBase::setMode(PupitreMode mode) {
 uint8_t PupitreBase::fire() {
     uint8_t res = 0;
     for (uint8_t i = 0 ; i<3;i++) {
-        if (lineIsActive(i) && fire(i)){
+        if (!lineIsActive(i)){
+            Serial.print("LINE NOT ACTIVE: ");
+            Serial.println(i);
+
+        }else if(fire(i)){
+            Serial.print("FIRE IN LINE ");
+            Serial.println(i);
             res += (uint8_t)1 << i;
+        } else{
+            Serial.print("FIRE CANCELED ");
+            Serial.println(i);
         }
     }
     return res;
 }
 
 boolean PupitreBase::fire(uint8_t line) {
-    if(mode != MODE_FIRE) return false;
-    if(!keyIsPresent()) return false;
+    if(mode != MODE_FIRE){
+        Serial.println("FIRE CANCELLED: Not in fire mode");
+        return false;
+    }
+    if(!keyIsPresent()) {
+        Serial.println("FIRE CANCELLED: Key not present");
+        return false;
+    }
 
     switch (line){
         case 0:
-            digitalWrite(PIN_COM_1, HIGH);
+            digitalWrite(PIN_LINE_1, HIGH);
             fireL1 = true;
-            break;
+            return true;
         case 1:
-            digitalWrite(PIN_COM_2, HIGH);
+            digitalWrite(PIN_LINE_2, HIGH);
             fireL2 = true;
-            break;
+            return true;
         case 2:
-            digitalWrite(PIN_COM_3, HIGH);
+            digitalWrite(PIN_LINE_3, HIGH);
             fireL3 = true;
-            break;
+            return true;
+        default:
+            return false;
     }
 
 
@@ -124,15 +175,15 @@ void PupitreBase::stopFire(uint8_t line) {
     if(!isFired(line))return;
     switch (line){
         case 0:
-            digitalWrite(PIN_COM_1, LOW);
+            digitalWrite(PIN_LINE_1, LOW);
             fireL1 = false;
             break;
         case 1:
-            digitalWrite(PIN_COM_2, LOW);
+            digitalWrite(PIN_LINE_2, LOW);
             fireL2 = false;
             break;
         case 2:
-            digitalWrite(PIN_COM_3, LOW);
+            digitalWrite(PIN_LINE_3, LOW);
             fireL3 = false;
             break;
     }
@@ -175,7 +226,7 @@ void PupitreBase::init() {
 }
 
 bool PupitreBase::lineIsActive(uint8_t line) {
-    multiSensor.getState().sensor[line] == SS_CLOSED;
+    return multiSensor.getState().sensor[line] == SS_CLOSED;
 }
 
 PupitreMode PupitreBase::getMode() {
@@ -195,13 +246,25 @@ LineStat PupitreBase::getLineStat(uint8_t line) {
     }
 }
 
+void PupitreBase::setLineStat(uint8_t line, LineStat stat) {
+    switch (line){
+        case 0:
+            statL1 = stat;
+            break;
+        case 1:
+            statL2 = stat;
+            break;
+        case 2:
+            statL3 = stat;
+            break;
+    }
+}
+
 bool PupitreBase::keyIsPresent() {
-    sensorClef.getState() == SS_CLOSED;
+    return sensorClef.getState() == SS_CLOSED;
 }
 
 void PupitreBase::update() {
-
-    multiSensor.checkChange();
 
     SensorEventCode sensorEvent = sensorClef.checkChange();
     if(sensorEvent != NONE){
@@ -222,7 +285,7 @@ void PupitreBase::update() {
         }
     }
 
-    const MultiSensorEventCode<4> &multiSensorEvent = multiSensor.checkChange();
+    const MultiSensorEventCode<4> multiSensorEvent = multiSensor.checkChange();
     if(multiSensorEvent.change){
         for(uint8_t i = 0; i < 3; i++){
             if(multiSensorEvent.sensor[i] == OPEN){

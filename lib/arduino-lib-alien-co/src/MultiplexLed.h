@@ -27,11 +27,12 @@ struct Color {
     uint32_t value() const {
         return ((((uint32_t) r) << (uint32_t) 16) & 0xFF0000) + ((g << 8) & 0x00FF00) + (b & 0x0000FF);
     }
-    static Color COLOR_ORANGE() {return Color(0xFFFFFF); }
-    static Color COLOR_WHITE(){ return Color(85,187,255); }
+    static Color COLOR_ORANGE() {return Color(0xef6c00); }
+    static Color COLOR_WHITE(){ return Color(0xFFFFFF); }
     static Color COLOR_RED(){ return Color(0xFF0000); }
     static Color COLOR_GREEN(){ return Color(0x00FF00); }
     static Color COLOR_BLUE(){ return Color(0x0000FF); }
+    static Color COLOR_PURPULE(){ return Color(0x8e24aa); }
     static Color COLOR_BLACK(){ return Color(0); }
 };
 class MultiplexLed {

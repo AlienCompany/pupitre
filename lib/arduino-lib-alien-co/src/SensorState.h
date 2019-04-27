@@ -6,8 +6,8 @@
 #define PUPITRE_SENSORSTATE_H
 
 enum SensorState {
-    SS_OPENED = 0,
-    SS_CLOSED = 1
+    SS_OPENED = 1,
+    SS_CLOSED = 0
 };
 
 enum SensorEventCode {
