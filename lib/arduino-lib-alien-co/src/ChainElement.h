@@ -63,7 +63,7 @@ ChainElement<T> *ChainElement<T>::getPrevious() const {
 
 template<typename T>
 void ChainElement<T>::setPrevious(ChainElement *previous) {
-    previous = previous;
+    ChainElement::previous = previous;
 }
 
 template<typename T>
@@ -82,7 +82,7 @@ ChainElement<T> *ChainElement<T>::getNext() const {
 
 template<typename T>
 void ChainElement<T>::setNext(ChainElement *next) {
-    next = next;
+    ChainElement::next = next;
 }
 
 template<typename T>

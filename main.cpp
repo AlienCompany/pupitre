@@ -2,39 +2,29 @@
 #include <Timer.h>
 
 void f1(){
-    Serial.println("f1");
+    Serial.print((uint32_t )millis());
+    Serial.println(": f1");
 }
 
 void f2(){
-    Serial.println("f2");
+    Serial.print((uint32_t )millis());
+    Serial.println(": f2");
 
 }
+void f3(){
+    Serial.print((uint32_t )millis());
+    Serial.println(": f3");
 
-void f3(uint8_t v1, uint8_t v2, uint8_t v3){
-    Serial.print("f3:");
-    Serial.print(v1);
-    Serial.print(",");
-    Serial.print(v2);
-    Serial.print(",");
-    Serial.println(v3);
-
-}
-void f4(int v1, int v2, int v3, int v4){
-
-    Serial.print("f4:");
-    Serial.print(v1);
-    Serial.print(",");
-    Serial.print(v2);
-    Serial.print(",");
-    Serial.print(v3);
-    Serial.print(",");
-    Serial.println(v4);
 }
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(9600);
+    Serial.print(millis());
+    Serial.println(": Start");
 
-    Timer::setTimeOut(100, f4 , 45,56,78,98);
+    Timer::setInterval(2000, f2);
+    Timer::setTimeOut(1000, f1);
+    Timer::setInterval(2500, f3);
 
 }
 
