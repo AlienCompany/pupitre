@@ -1,33 +1,45 @@
 #include <Arduino.h>
-#include "PupitrePSTJ.h"
+#include <Timer.h>
 
+void f1(){
+    Serial.println("f1");
+}
 
-PupitrePSTJ pupitre = PupitrePSTJ(
-        6, 7, 8, 9, 10, 11, // Leds
-        3, 4, 5, 2, // Ligne
-        13, 12, // Fire & clef
-        A3, // btns
-        A6, A7, // Encodeur
-        A4, A5, 0x27 // LCD
-);
+void f2(){
+    Serial.println("f2");
 
-uint32_t loopMinTime = 3;
+}
+
+void f3(uint8_t v1, uint8_t v2, uint8_t v3){
+    Serial.print("f3:");
+    Serial.print(v1);
+    Serial.print(",");
+    Serial.print(v2);
+    Serial.print(",");
+    Serial.println(v3);
+
+}
+void f4(int v1, int v2, int v3, int v4){
+
+    Serial.print("f4:");
+    Serial.print(v1);
+    Serial.print(",");
+    Serial.print(v2);
+    Serial.print(",");
+    Serial.print(v3);
+    Serial.print(",");
+    Serial.println(v4);
+}
 
 void setup() {
     Serial.begin(115200);
-    pupitre.init();
+
+    Timer::setTimeOut(100, f4 , 45,56,78,98);
+
 }
 
 void loop() {
-    uint32_t startTime = millis();
 
-    pupitre.update();
-
-    uint32_t endTime = millis();
-    if (endTime - startTime < loopMinTime) {
-        delay(loopMinTime + startTime - endTime);
-
-//        Serial.println(digitalRead(13));
-    }
+    Timer::check();
 
 }
