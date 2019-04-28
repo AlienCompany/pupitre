@@ -38,6 +38,15 @@ void ChainElement<T>::setPrevious(ChainElement *previous) {
 }
 
 template<typename T>
+
+void ChainElement<T>::setPrevious(const T &el) {
+    ChainElement<T>* e = new ChainElement(el);
+    e->setNext(this);
+    e->setPrevious(previous);
+    this->setPrevious(e);
+}
+
+template<typename T>
 ChainElement<T> *ChainElement<T>::getNext() const {
     return next;
 }
@@ -45,4 +54,12 @@ ChainElement<T> *ChainElement<T>::getNext() const {
 template<typename T>
 void ChainElement<T>::setNext(ChainElement *next) {
     ChainElement::next = next;
+}
+
+template<typename T>
+void ChainElement<T>::setNext(const T &el) {
+    ChainElement<T>* e = new ChainElement(el);
+    e->setNext(next);
+    e->setPrevious(this);
+    this->setNext(e);
 }

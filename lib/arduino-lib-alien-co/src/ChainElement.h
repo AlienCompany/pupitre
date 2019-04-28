@@ -23,10 +23,12 @@ public:
     ChainElement *getPrevious() const;
 
     void setPrevious(ChainElement *previous);
+    void setPrevious(const T &el);
 
     ChainElement *getNext() const;
 
     void setNext(ChainElement *next);
+    void setNext(const T &el);
 
 };
 
