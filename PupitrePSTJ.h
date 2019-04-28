@@ -6,6 +6,7 @@
 #define PUPITRE_PUPITREPSTJ_H
 
 
+#include <LiquidCrystal_I2C.h>
 #include "PupitreBase.h"
 
 class PupitrePSTJ : public PupitreBase {
@@ -17,10 +18,12 @@ private:
     uint32_t displayDangerCount = 0;
     uint32_t displayDangerNextChange = 0;
 
+    LiquidCrystal_I2C *lcdI2C;
+
 public:
     PupitrePSTJ(byte pinLed1, byte pinLed2, byte pinLed3, byte pinLedColor1, byte pinLedColor2, byte pinLedColor3,
                 byte pinLine1, byte pinLine2, byte pinLine3, byte pinLineCom, byte pinFire, byte pinClef, byte pinBtns,
-                byte pinEncoderA, byte pinEncoderB, byte pinLcdSda, byte pinLcdScl);
+                byte pinEncoderA, byte pinEncoderB, byte pinLcdSda, byte pinLcdScl, byte lcdAddress);
 
 protected:
     void onKeyRemove() override;

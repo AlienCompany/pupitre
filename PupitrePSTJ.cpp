@@ -6,9 +6,12 @@
 
 PupitrePSTJ::PupitrePSTJ(byte pinLed1, byte pinLed2, byte pinLed3, byte pinLedColor1, byte pinLedColor2,
                          byte pinLedColor3, byte pinLine1, byte pinLine2, byte pinLine3, byte pinLineCom, byte pinFire,
-                         byte pinClef, byte pinBtns, byte pinEncoderA, byte pinEncoderB, byte pinLcdSda, byte pinLcdScl)
+                         byte pinClef, byte pinBtns, byte pinEncoderA, byte pinEncoderB, byte pinLcdSda, byte pinLcdScl,
+                         byte lcdAddress)
         : PupitreBase(pinLed1, pinLed2, pinLed3, pinLedColor1, pinLedColor2, pinLedColor3, pinLine1, pinLine2, pinLine3,
-                      pinLineCom, pinFire, pinClef, pinBtns, pinEncoderA, pinEncoderB, pinLcdSda, pinLcdScl) {}
+                      pinLineCom, pinFire, pinClef, pinBtns, pinEncoderA, pinEncoderB, pinLcdSda, pinLcdScl) {
+    lcdI2C = (new LiquidCrystal_I2C(lcdAddress, 20, 4));
+}
 
 void PupitrePSTJ::onKeyRemove() {
     Serial.println("onKeyRemove");

@@ -8,7 +8,7 @@ PupitrePSTJ pupitre = PupitrePSTJ(
         13, 12, // Fire & clef
         A3, // btns
         A6, A7, // Encodeur
-        A4, A5 // LCD
+        A4, A5, 0x27 // LCD
 );
 
 uint32_t loopMinTime = 3;
