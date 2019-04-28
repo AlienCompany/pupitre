@@ -4,73 +4,98 @@
 
 #include <Arduino.h>
 #include "Chain.h"
+#include "ChainElement.h"
 
 #ifndef PUPITRE_TIMER_H
 #define PUPITRE_TIMER_H
 
-
-template<class... Args>
-class Timer : public Args ... {
-private:
-    static Chain<Timer *> chain;
+class TimerExecutable {
+public:
     static uint16_t idInc;
     uint16_t id;
     uint32_t nextExecute;
     uint32_t interval;
 
-    void (*func)(Args &...);
+    virtual void execute() = 0;
 
-    void execute() {
-        func(((Args) this)...);
+    TimerExecutable(
+        uint32_t nextExecute,
+        uint32_t interval
+    ): nextExecute(nextExecute),
+            interval(interval){
+        id = idInc++;
+    }
+};
+
+
+
+template<typename... Args>
+class TimerE : public TimerExecutable{
+public:
+    static const int size = sizeof...(Args);
+    uint8_t* data = NULL;
+
+    void (*func)(Args ...);
+
+    void execute() override {
+
+        func(((Args) (*data))...);
     }
 //    Args2...* args;
 
-    Timer(
+    TimerE(
             uint32_t nextExecute,
             uint32_t interval,
-            const void (*f)(Args &...),
-            const Args &... args
-    ) : nextExecute(nextExecute),
-    interval(interval),
-    Args(args)...,
-    id(idInc++){
+            void (*f)(Args ...),
+            Args... args
+    ) : TimerExecutable(nextExecute, interval){
         func = f;
+        id = TimerExecutable::idInc++;
+        data = new uint8_t[size]{ args...};
     }
+};
 
+
+
+
+class Timer{
+private:
+    static Chain<TimerExecutable *> chain;
 public:
 
-    static uint16_t setInterval(size_t interval, const void (*f)(Args &...), const Args &... args) {
-        Timer *t = new Timer(millis() + interval, interval, f, args...);
-        Timer<Args...>::chain.pushBack(t);
+    template<typename... Args>
+    static uint16_t setInterval(size_t interval, const void (*f)(Args &...), Args ... args) {
+        TimerExecutable *t = new TimerE<Args...>(millis() + interval, interval, f, args...);
+        chain.pushBack(t);
         return t->id;
     }
 
-    static void setTimeOut(size_t time, const void (*f)(Args &...), const Args &... args) {
-        Timer *t = new Timer(millis() + time, 0, f, args...);
-        Timer<Args...>::chain.pushBack(t);
+    template<typename... Args>
+    static uint16_t setTimeOut(size_t time, void (*f)(Args ...), Args ... args) {
+        TimerExecutable *t = new TimerE<Args...>(millis() + time, 0, f, args...);
+        chain.pushBack(t);
         return t->id;
     }
 
     static void check() {
-        ChainElement<Timer> v = chain.getFirst()->getValue();
+        TimerExecutable* v = chain.getFirst()->getValue();
         if (v->nextExecute < millis()) {
             v->execute();
             chain.removeFirst();
             if (v->interval) {
                 v->nextExecute += v->interval;
-                ChainElement<Timer *> *e = &chain.getFirst();
+                ChainElement<TimerExecutable *> *e = chain.getFirst();
                 while (e != NULL && e->getValue()->nextExecute < v->nextExecute) {
                     e = e->getNext();
                 }
                 if (e == NULL) {
                     chain.pushBack(v);
                 } else {
-                    e.setPrevious(v);
+                    e->setPrevious(v);
                 }
             }
         }
     }
 };
-
 
 #endif //PUPITRE_TIMER_H
