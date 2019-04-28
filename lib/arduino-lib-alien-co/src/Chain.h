@@ -103,7 +103,7 @@ T Chain<T>::remove(ChainElement<T> *element) {
 
 template<typename T>
 uint16_t Chain<T>::length() const {
-    int length = 0;
+    uint16_t length = 0;
     ChainElement<T>* element = this->first;
     for(;element != NULL; element = element->getNext())length++;
     return length;
